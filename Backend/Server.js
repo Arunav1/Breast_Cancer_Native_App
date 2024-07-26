@@ -16,7 +16,7 @@ app.use(cors());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use(questRoutes);
+app.use("/", questRoutes);
 // app.use("/api/submit", questRoutes);
 
 const PORT = process.env.PORT || 3000;

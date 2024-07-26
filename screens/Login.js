@@ -19,6 +19,7 @@ import Checkbox from "expo-checkbox";
 import SocialButton from "../components/SocialButton";
 import * as Animatable from "react-native-animatable";
 import axios from "axios"; // Add Axios
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const isTestMode = true;
 
@@ -51,7 +52,7 @@ const Login = ({ navigation }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://192.168.194.185:3000/api/auth/login",
+        "http://192.168.52.185:3000/api/auth/login",
         {
           email: formState.inputValues.email,
           password: formState.inputValues.password,
@@ -59,7 +60,9 @@ const Login = ({ navigation }) => {
       );
 
       if (response.data.token) {
-        // Save token and navigate to PersonalMedicalHistoryScreen upon successful login
+        const token = response.data.token;
+        await AsyncStorage.setItem("token", token);
+        console.log("Token Stored:", token); //storing the token and retrieving again from the backend after the user ID is formed in the backend..
         navigation.navigate("PersonalMedicalHistoryScreen");
       } else {
         Alert.alert("Login Failed", response.data.error);

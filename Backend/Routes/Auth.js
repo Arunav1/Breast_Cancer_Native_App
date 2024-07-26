@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../Models/Users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const authMid = require("../Middlewares/AuthMiddleware");
 
 require("dotenv").config();
 
@@ -56,6 +57,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    console.log("Generated Token:", token);
     res.send({ message: "Login successful", token });
   } catch (err) {
     console.error("Error:", err.message);
