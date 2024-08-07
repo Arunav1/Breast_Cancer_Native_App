@@ -12,6 +12,12 @@ import Verification from "./screens/Verification";
 import PersonalMedicalHistoryScreen from "./screens/PersonalMedicalHistoryScreen";
 import Tabs from "./screens/BottomTab";
 import Dashboard from "./screens/Dashboard";
+import DailyEntry from "./screens/DailyEntry";
+import AssociatedSymptoms from "./screens/AssociatedSymptoms";
+import AnalysisPage from "./screens/Analysis";
+import Drawer_tab from "./screens/Drawer_Tab";
+import { TransitionPresets } from "@react-navigation/stack";
+import ProfilePage from "./screens/Profile";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -44,7 +50,7 @@ export default function App() {
         <View onLayout={onLayoutRootView} style={{ flex: 1 }}>
           <NavigationContainer>
             <Stack.Navigator initialRouteName="Register">
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="Register"
                 component={Register}
                 options={{
@@ -71,7 +77,7 @@ export default function App() {
                 options={{
                   headerShown: false,
                 }}
-              />
+              /> */}
               <Stack.Screen
                 name="BottomTab"
                 component={Tabs}
@@ -82,6 +88,48 @@ export default function App() {
               <Stack.Screen
                 name="Dashboard"
                 component={Dashboard}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="DailyEntry"
+                component={DailyEntry}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="AssociatedSymptoms"
+                component={AssociatedSymptoms}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="Analysis"
+                component={AnalysisPage}
+                options={{
+                  headerTitleStyle: {
+                    marginLeft: "45%",
+                  },
+                  headerShown: true,
+                  headerStyle: { backgroundColor: "#E582AD" },
+                }}
+              />
+              <Stack.Screen
+                name="DrawerTab"
+                component={Drawer_tab}
+                options={{
+                  headerTitle: "",
+                  headerStyle: { backgroundColor: "#E582AD", height: 70 },
+                  ...TransitionPresets.SlideFromRightIOS, // You can customize the animation here
+                  gestureDirection: "horizontal-inverted",
+                }}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={ProfilePage}
                 options={{
                   headerShown: false,
                 }}

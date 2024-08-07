@@ -198,7 +198,7 @@ const Dashboard = ({ navigation }) => {
                 <View style={styles.activityContainer}>
                   <Pressable
                     style={styles.activityItem}
-                    onPress={() => navigation.navigate("DailyReport")}
+                    onPress={() => navigation.navigate("DailyEntry")}
                   >
                     <ImageBackground
                       source={require("../assets/Activity.jpg")} // Replace with your image URL or local image

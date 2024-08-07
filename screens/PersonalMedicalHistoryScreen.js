@@ -164,7 +164,7 @@ const PersonalMedicalHistoryScreen = ({ navigation }) => {
           console.log("Transformed Data:", { history }); // Debug log
 
           const response = await axios.post(
-            "http://192.168.52.185:3000/api/submit",
+            "http://192.168.42.185:3000/api/submit",
             { history },
             {
               headers: {

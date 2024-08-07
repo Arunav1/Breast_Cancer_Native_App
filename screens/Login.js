@@ -52,7 +52,7 @@ const Login = ({ navigation }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://192.168.52.185:3000/api/auth/login",
+        "http://192.168.42.185:3000/api/auth/login",
         {
           email: formState.inputValues.email,
           password: formState.inputValues.password,
