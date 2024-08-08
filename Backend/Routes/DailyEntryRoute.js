@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const DailyEntry = require("../Models/DailyEntrySchema");
 const authMiddleware = require("../Middlewares/AuthMiddleware");
+const moment = require("moment-timezone");
 
 // POST route to save a daily entry
 router.post("/daily-entry", authMiddleware, async (req, res) => {
@@ -18,10 +19,8 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
       selectedRightLocations,
     } = req.body;
 
-    // Log the received data for debugging
     console.log("Received Data:", JSON.stringify(req.body, null, 2));
 
-    // Basic validation to check if required fields are present
     if (
       !date ||
       !selectedPeriodDay ||
@@ -38,20 +37,20 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
         .json({ message: "Invalid data format or missing required fields" });
     }
 
-    // Create a new entry
+    const localDate = moment.tz(date, "Asia/Kolkata").format("YYYY-MM-DD");
+
     const newEntry = new DailyEntry({
-      user: req.user._id, // Include the authenticated user's ID
-      date,
+      user: req.user._id,
+      date: localDate,
       from,
       selectedPeriodDay,
       selectedPain,
       painLevel,
       selectedSide,
-      selectedLeftLocations: selectedLeftLocations || [], // Default to empty array if not provided
-      selectedRightLocations: selectedRightLocations || [], // Default to empty array if not provided
+      selectedLeftLocations: selectedLeftLocations || [],
+      selectedRightLocations: selectedRightLocations || [],
     });
 
-    // Save the entry to the database
     await newEntry.save();
     res.status(201).json({ message: "Daily entry saved successfully" });
   } catch (error) {
@@ -64,8 +63,26 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
 
 router.get("/daily-entry", async (req, res) => {
   try {
-    const painRecords = await DailyEntry.find({}).select("date painLevel");
-    res.json(painRecords);
+    const { month, year } = req.query;
+
+    let painRecords;
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 1);
+
+      painRecords = await DailyEntry.find({
+        date: { $gte: startDate, $lt: endDate },
+      }).select("date painLevel");
+    } else {
+      painRecords = await DailyEntry.find({}).select("date painLevel");
+    }
+
+    const formattedRecords = painRecords.map((record) => ({
+      date: moment(record.date).format("YYYY-MM-DD"),
+      painLevel: record.painLevel,
+    }));
+
+    res.json(formattedRecords);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

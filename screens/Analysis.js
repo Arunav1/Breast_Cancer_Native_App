@@ -8,7 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { LineChart, PieChart } from "react-native-chart-kit";
+import { LineChart } from "react-native-chart-kit";
 import DropDownMenuButton from "../components/CustomDropDown";
 import CalendarHeatmap from "../components/CalenderHeatmap";
 import * as Animatable from "react-native-animatable";
@@ -29,6 +29,7 @@ const chartConfig = {
     strokeWidth: "3",
     stroke: "green",
   },
+  yLabelsOffset: 10, // Adjust this value if necessary to correctly position the labels
 };
 
 const AnalysisPage = () => {
@@ -40,12 +41,12 @@ const AnalysisPage = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.141.185:3000/daily-entry"
+          "http://192.168.137.31:3000/daily-entry"
         );
         const data = response.data;
 
         const formattedData = data.map((entry) => ({
-          date: entry.date || "Unknown",
+          date: entry.date,
           painLevel: entry.painLevel !== undefined ? entry.painLevel : 0,
         }));
 
@@ -68,7 +69,7 @@ const AnalysisPage = () => {
     }
 
     const data = {
-      labels: painData.map((entry) => entry.date),
+      labels: painData.map((entry) => entry.date || ""),
       datasets: [
         {
           data: painData.map((entry) =>
@@ -78,20 +79,29 @@ const AnalysisPage = () => {
       ],
     };
 
+    const chartWidth = width * 0.95 + painData.length * 10; // Adjust width based on number of data points
+
     switch (selectedChart) {
       case "LineChart":
         return (
-          <LineChart
-            data={data}
-            width={width * 0.95}
-            height={height * 0.28}
-            yAxisLabel=""
-            yAxisSuffix=""
-            yAxisInterval={1}
-            chartConfig={chartConfig}
-            bezier
-            style={{ borderRadius: 16 }}
-          />
+          <ScrollView horizontal>
+            <LineChart
+              data={data}
+              width={chartWidth} // Make chart width dynamic
+              height={height * 0.28}
+              yAxisLabel=""
+              yAxisSuffix=""
+              yAxisInterval={1} // Ensure y-axis has intervals of 1
+              fromZero={true} // Ensure y-axis starts from 0
+              chartConfig={{
+                ...chartConfig,
+                formatYLabel: (yValue) => yValue.toString(), // Explicitly format the y-axis labels
+              }}
+              bezier
+              style={{ borderRadius: 16 }}
+              verticalLabelRotation={30} // Rotate the labels for better visibility
+            />
+          </ScrollView>
         );
       case "heatmap":
         return <CalendarHeatmap />;
@@ -158,23 +168,6 @@ const AnalysisPage = () => {
             >
               <View style={styles.textView}>
                 <Text style={styles.textHeading}>Pain Status</Text>
-                <PieChart
-                  data={painData.map((entry) => ({
-                    name: entry.date,
-                    population: entry.painLevel,
-                    color: "#FF0000",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15,
-                  }))}
-                  width={width * 0.95}
-                  height={150}
-                  chartConfig={chartConfig}
-                  accessor={"population"}
-                  backgroundColor={"transparent"}
-                  paddingLeft={-20}
-                  center={[30, 5]}
-                  absolute
-                />
               </View>
             </ScrollView>
           )}

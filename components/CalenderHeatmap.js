@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import moment from "moment";
 import { LinearGradient } from "expo-linear-gradient";
 import Swiper from "react-native-swiper";
@@ -7,8 +7,8 @@ import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
 
-const getColor = (count) => {
-  switch (count) {
+const getColor = (painLevel) => {
+  switch (painLevel) {
     case 1:
       return "#66FF33";
     case 2:
@@ -16,11 +16,11 @@ const getColor = (count) => {
     case 3:
       return "#FFCC00";
     case 4:
-      return "red";
+      return "#FF9900";
     case 5:
       return "#FF3300";
     default:
-      return "#FFF"; // Default color for days with no data
+      return "#FFF";
   }
 };
 
@@ -35,7 +35,7 @@ const CalendarHeatmap = () => {
     const fetchHeatmapData = async (monthIndex) => {
       try {
         const response = await axios.get(
-          `http://192.168.141.185:3000/daily-entry`,
+          `http://192.168.137.31:3000/daily-entry`,
           {
             params: {
               month: monthIndex,
@@ -43,9 +43,11 @@ const CalendarHeatmap = () => {
             },
           }
         );
-        console.log("Fetched heatmap data:", response.data); // Log the fetched data
+        console.log(
+          `Fetched heatmap data for month ${monthIndex}:`,
+          response.data
+        );
 
-        // Transform the data to a more usable format
         const data = response.data.reduce((acc, entry) => {
           const dateKey = moment(entry.date).format("YYYY-MM-DD");
           acc[dateKey] = entry.painLevel;

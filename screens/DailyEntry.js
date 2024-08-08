@@ -171,7 +171,7 @@ const DailyEntry = () => {
           console.log("Sending data to backend:", newData); // Debug log
 
           const response = await axios.post(
-            "http://192.168.141.185:3000/daily-entry",
+            "http://192.168.137.31:3000/daily-entry",
             newData,
             {
               headers: {

@@ -30,6 +30,7 @@
     "expo-status-bar": "~1.12.1",
     "install": "^0.13.0",
     "moment": "^2.30.1",
+    "moment-timezone": "^0.5.45",
     "react": "18.2.0",
     "react-native": "0.74.3",
     "react-native-animatable": "^1.4.0",

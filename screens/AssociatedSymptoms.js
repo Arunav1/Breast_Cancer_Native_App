@@ -370,7 +370,7 @@ const AssociatedSymptoms = ({ route }) => {
       } else {
         console.log("Sending Payload:", payload);
         const response = await axios.post(
-          "http://192.168.141.185:3000/AssociatedSymptoms",
+          "http://192.168.137.31:3000/AssociatedSymptoms",
           payload,
           {
             headers: {
@@ -383,7 +383,7 @@ const AssociatedSymptoms = ({ route }) => {
           setSavedData(response.data);
           console.log("Data Saved Successfully:", response.data);
           Alert.alert("Data saved successfully");
-          navigation.navigate("Dashboard");
+          navigation.navigate("BottomTab");
         } else {
           console.error("Error Saving Data:", response.data);
           Alert.alert("Failed to save data. Please try again.");
