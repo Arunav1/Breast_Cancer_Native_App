@@ -63,28 +63,36 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
 
 router.get("/daily-entry", async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { duration } = req.query;
+    let startDate;
 
-    let painRecords;
-    if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 1);
-
-      painRecords = await DailyEntry.find({
-        date: { $gte: startDate, $lt: endDate },
-      }).select("date painLevel");
-    } else {
-      painRecords = await DailyEntry.find({}).select("date painLevel");
+    switch (duration) {
+      case "10days":
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 10);
+        break;
+      case "1month":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "6months":
+        startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "1year":
+        startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+      default:
+        startDate = null;
     }
 
-    const formattedRecords = painRecords.map((record) => ({
-      date: moment(record.date).format("YYYY-MM-DD"),
-      painLevel: record.painLevel,
-    }));
+    const filter = startDate ? { date: { $gte: startDate } } : {};
+    const entries = await DailyEntry.find(filter).sort({ date: 1 });
 
-    res.json(formattedRecords);
+    res.json(entries);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

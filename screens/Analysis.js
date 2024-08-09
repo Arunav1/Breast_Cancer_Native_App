@@ -14,6 +14,7 @@ import CalendarHeatmap from "../components/CalenderHeatmap";
 import * as Animatable from "react-native-animatable";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
+import moment from "moment";
 
 const { width, height } = Dimensions.get("window");
 
@@ -36,12 +37,14 @@ const AnalysisPage = () => {
   const [selectedChart, setSelectedChart] = useState("LineChart");
   const [PainReportVisible, setPainReportVisible] = useState(true);
   const [painData, setPainData] = useState([]);
+  const [duration, setDuration] = useState("tilldate");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch data based on selected duration
         const response = await axios.get(
-          "http://192.168.137.31:3000/daily-entry"
+          `http://192.168.137.31:3000/daily-entry?duration=${duration}`
         );
         const data = response.data;
 
@@ -57,7 +60,7 @@ const AnalysisPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [duration]);
 
   const togglePainReportVisible = useCallback(() => {
     setPainReportVisible((prevState) => !prevState);
@@ -69,7 +72,7 @@ const AnalysisPage = () => {
     }
 
     const data = {
-      labels: painData.map((entry) => entry.date || ""),
+      labels: painData.map((entry) => moment(entry.date).format("DD MMM")),
       datasets: [
         {
           data: painData.map((entry) =>
@@ -79,7 +82,7 @@ const AnalysisPage = () => {
       ],
     };
 
-    const chartWidth = width * 0.95 + painData.length * 10; // Adjust width based on number of data points
+    const chartWidth = width * 0.95 + painData.length * 30; // Adjust width based on number of data points
 
     switch (selectedChart) {
       case "LineChart":
@@ -146,7 +149,7 @@ const AnalysisPage = () => {
             </View>
             <View style={styles.dropDownContainer}>
               <Text style={styles.label}>Duration</Text>
-              <DropDownMenuButton />
+              <DropDownMenuButton onSelect={setDuration} />
             </View>
           </View>
 
