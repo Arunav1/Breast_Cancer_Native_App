@@ -8,7 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { LineChart } from "react-native-chart-kit";
+import { LineChart, PieChart } from "react-native-chart-kit";
 import DropDownMenuButton from "../components/CustomDropDown";
 import CalendarHeatmap from "../components/CalenderHeatmap";
 import * as Animatable from "react-native-animatable";
@@ -30,19 +30,19 @@ const chartConfig = {
     strokeWidth: "3",
     stroke: "green",
   },
-  yLabelsOffset: 10, // Adjust this value if necessary to correctly position the labels
+  yLabelsOffset: 10,
 };
 
 const AnalysisPage = () => {
   const [selectedChart, setSelectedChart] = useState("LineChart");
   const [PainReportVisible, setPainReportVisible] = useState(true);
   const [painData, setPainData] = useState([]);
+  const [pieData, setPieData] = useState([]);
   const [duration, setDuration] = useState("tilldate");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch data based on selected duration
         const response = await axios.get(
           `http://192.168.137.31:3000/daily-entry?duration=${duration}`
         );
@@ -54,6 +54,49 @@ const AnalysisPage = () => {
         }));
 
         setPainData(formattedData);
+
+        const pieChartData = [
+          {
+            name: "Very High",
+            pain: data.filter((d) => d.painLevel >= 8).length,
+            color: "#FF3300",
+            legendFontColor: "#000",
+            legendFontSize: 15,
+          },
+          {
+            name: "High",
+            pain: data.filter((d) => d.painLevel >= 6 && d.painLevel < 8)
+              .length,
+            color: "#FF9900",
+            legendFontColor: "#000",
+            legendFontSize: 15,
+          },
+          {
+            name: "Medium",
+            pain: data.filter((d) => d.painLevel >= 4 && d.painLevel < 6)
+              .length,
+            color: "#FFCC00",
+            legendFontColor: "#000",
+            legendFontSize: 15,
+          },
+          {
+            name: "Low",
+            pain: data.filter((d) => d.painLevel >= 2 && d.painLevel < 4)
+              .length,
+            color: "#99FF33",
+            legendFontColor: "#000",
+            legendFontSize: 15,
+          },
+          {
+            name: "Very Low",
+            pain: data.filter((d) => d.painLevel < 2).length,
+            color: "#FFFF00",
+            legendFontColor: "#000",
+            legendFontSize: 15,
+          },
+        ];
+
+        setPieData(pieChartData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -82,7 +125,7 @@ const AnalysisPage = () => {
       ],
     };
 
-    const chartWidth = width * 0.95 + painData.length * 30; // Adjust width based on number of data points
+    const chartWidth = width * 0.95 + painData.length * 30;
 
     switch (selectedChart) {
       case "LineChart":
@@ -90,19 +133,19 @@ const AnalysisPage = () => {
           <ScrollView horizontal>
             <LineChart
               data={data}
-              width={chartWidth} // Make chart width dynamic
+              width={chartWidth}
               height={height * 0.28}
               yAxisLabel=""
               yAxisSuffix=""
-              yAxisInterval={1} // Ensure y-axis has intervals of 1
-              fromZero={true} // Ensure y-axis starts from 0
+              yAxisInterval={1}
+              fromZero={true}
               chartConfig={{
                 ...chartConfig,
-                formatYLabel: (yValue) => yValue.toString(), // Explicitly format the y-axis labels
+                formatYLabel: (yValue) => yValue.toString(),
               }}
               bezier
               style={{ borderRadius: 16 }}
-              verticalLabelRotation={30} // Rotate the labels for better visibility
+              verticalLabelRotation={30}
             />
           </ScrollView>
         );
@@ -112,6 +155,26 @@ const AnalysisPage = () => {
         return null;
     }
   }, [selectedChart, painData]);
+
+  const renderPieChart = useMemo(() => {
+    if (!pieData || pieData.length === 0) {
+      return <Text>No data available for Pie Chart</Text>;
+    }
+
+    return (
+      <PieChart
+        data={pieData}
+        width={width * 0.95}
+        height={150}
+        chartConfig={chartConfig}
+        accessor={"pain"}
+        backgroundColor={"transparent"}
+        paddingLeft={-20}
+        center={[30, 5]}
+        absolute
+      />
+    );
+  }, [pieData]);
 
   return (
     <LinearGradient
@@ -171,6 +234,7 @@ const AnalysisPage = () => {
             >
               <View style={styles.textView}>
                 <Text style={styles.textHeading}>Pain Status</Text>
+                {renderPieChart}
               </View>
             </ScrollView>
           )}

@@ -63,7 +63,7 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
 
 router.get("/daily-entry", async (req, res) => {
   try {
-    const { duration } = req.query;
+    const { duration, aggregate } = req.query; // 'aggregate' is an optional query parameter
     let startDate;
 
     switch (duration) {
@@ -88,9 +88,32 @@ router.get("/daily-entry", async (req, res) => {
     }
 
     const filter = startDate ? { date: { $gte: startDate } } : {};
-    const entries = await DailyEntry.find(filter).sort({ date: 1 });
 
-    res.json(entries);
+    if (aggregate === "painLevels") {
+      // Aggregating data for the pie chart
+      const aggregatedData = await DailyEntry.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$painLevel", // Group by pain level
+            count: { $sum: 1 }, // Count the number of occurrences
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            painLevel: "$_id",
+            count: 1,
+          },
+        },
+      ]).sort({ painLevel: 1 });
+
+      return res.json(aggregatedData);
+    } else {
+      // Default data retrieval for line graph and heatmap
+      const entries = await DailyEntry.find(filter).sort({ date: 1 });
+      return res.json(entries);
+    }
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
