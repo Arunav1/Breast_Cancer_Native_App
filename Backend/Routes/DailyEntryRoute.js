@@ -39,11 +39,14 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
 
     const localDate = moment.tz(date, "Asia/Kolkata").format("YYYY-MM-DD");
 
+    // Normalize selectedPeriodDay to lowercase to ensure consistency
+    const normalizedPeriodDay = selectedPeriodDay.toLowerCase();
+
     const newEntry = new DailyEntry({
       user: req.user._id,
       date: localDate,
       from,
-      selectedPeriodDay,
+      selectedPeriodDay: normalizedPeriodDay, // Store the normalized value
       selectedPain,
       painLevel,
       selectedSide,
@@ -61,9 +64,10 @@ router.post("/daily-entry", authMiddleware, async (req, res) => {
   }
 });
 
+// GET route to retrieve daily entries
 router.get("/daily-entry", async (req, res) => {
   try {
-    const { duration, aggregate } = req.query; // 'aggregate' is an optional query parameter
+    const { duration, aggregate } = req.query;
     let startDate;
 
     switch (duration) {
@@ -112,9 +116,17 @@ router.get("/daily-entry", async (req, res) => {
     } else {
       // Default data retrieval for line graph and heatmap
       const entries = await DailyEntry.find(filter).sort({ date: 1 });
-      return res.json(entries);
+
+      // Normalize selectedPeriodDay to lowercase before sending the response
+      const normalizedEntries = entries.map((entry) => ({
+        ...entry.toObject(),
+        selectedPeriodDay: entry.selectedPeriodDay.toLowerCase(),
+      }));
+
+      return res.json(normalizedEntries);
     }
   } catch (error) {
+    console.error("Error retrieving daily entries:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

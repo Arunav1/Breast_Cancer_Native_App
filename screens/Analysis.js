@@ -39,6 +39,16 @@ const AnalysisPage = () => {
   const [painData, setPainData] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [duration, setDuration] = useState("tilldate");
+  const [painDays, setPainDays] = useState({
+    veryHigh: 0,
+    high: 0,
+    medium: 0,
+    low: 0,
+    veryLow: 0,
+  });
+
+  const [leftBreastData, setLeftBreastData] = useState([]);
+  const [rightBreastData, setRightBreastData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,45 +61,57 @@ const AnalysisPage = () => {
         const formattedData = data.map((entry) => ({
           date: entry.date,
           painLevel: entry.painLevel !== undefined ? entry.painLevel : 0,
+          selectedPeriodDay: entry.selectedPeriodDay.toLowerCase(),
+          selectedSide: entry.selectedSide,
+          selectedLeftLocations: entry.selectedLeftLocations || [],
+          selectedRightLocations: entry.selectedRightLocations || [],
         }));
 
         setPainData(formattedData);
 
+        // Calculate days for each pain level
+        const painDaysCount = {
+          veryHigh: formattedData.filter((d) => d.painLevel === 5).length,
+          high: formattedData.filter((d) => d.painLevel === 4).length,
+          medium: formattedData.filter((d) => d.painLevel === 3).length,
+          low: formattedData.filter((d) => d.painLevel === 2).length,
+          veryLow: formattedData.filter((d) => d.painLevel === 1).length,
+        };
+
+        setPainDays(painDaysCount);
+
         const pieChartData = [
           {
             name: "Very High",
-            pain: data.filter((d) => d.painLevel >= 8).length,
+            pain: painDaysCount.veryHigh,
             color: "#FF3300",
             legendFontColor: "#000",
             legendFontSize: 15,
           },
           {
             name: "High",
-            pain: data.filter((d) => d.painLevel >= 6 && d.painLevel < 8)
-              .length,
+            pain: painDaysCount.high,
             color: "#FF9900",
             legendFontColor: "#000",
             legendFontSize: 15,
           },
           {
             name: "Medium",
-            pain: data.filter((d) => d.painLevel >= 4 && d.painLevel < 6)
-              .length,
+            pain: painDaysCount.medium,
             color: "#FFCC00",
             legendFontColor: "#000",
             legendFontSize: 15,
           },
           {
             name: "Low",
-            pain: data.filter((d) => d.painLevel >= 2 && d.painLevel < 4)
-              .length,
+            pain: painDaysCount.low,
             color: "#99FF33",
             legendFontColor: "#000",
             legendFontSize: 15,
           },
           {
             name: "Very Low",
-            pain: data.filter((d) => d.painLevel < 2).length,
+            pain: painDaysCount.veryLow,
             color: "#FFFF00",
             legendFontColor: "#000",
             legendFontSize: 15,
@@ -97,6 +119,13 @@ const AnalysisPage = () => {
         ];
 
         setPieData(pieChartData);
+
+        // Calculate left and right breast data dynamically
+        const leftBreast = calculateBreastData(formattedData, "Left");
+        const rightBreast = calculateBreastData(formattedData, "Right");
+
+        setLeftBreastData(leftBreast);
+        setRightBreastData(rightBreast);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -104,6 +133,48 @@ const AnalysisPage = () => {
 
     fetchData();
   }, [duration]);
+
+  // Helper function to calculate breast data dynamically
+  const calculateBreastData = (data, side) => {
+    const allLocations = data
+      .flatMap((entry) => entry[`selected${side}Locations`])
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    return allLocations.map((position) => {
+      const positionData = data.filter(
+        (entry) =>
+          entry.selectedSide === side &&
+          entry[`selected${side}Locations`].includes(position)
+      );
+
+      const painLevelCounts = {
+        veryHigh: positionData.filter((entry) => entry.painLevel === 5).length,
+        high: positionData.filter((entry) => entry.painLevel === 4).length,
+        medium: positionData.filter((entry) => entry.painLevel === 3).length,
+        low: positionData.filter((entry) => entry.painLevel === 2).length,
+        veryLow: positionData.filter((entry) => entry.painLevel === 1).length,
+      };
+
+      const totalDays = positionData.length;
+
+      const painLabel =
+        painLevelCounts.veryHigh > 0
+          ? "Very High"
+          : painLevelCounts.high > 0
+          ? "High"
+          : painLevelCounts.medium > 0
+          ? "Medium"
+          : painLevelCounts.low > 0
+          ? "Low"
+          : "Very Low";
+
+      return {
+        position,
+        painLabel,
+        totalDays,
+      };
+    });
+  };
 
   const togglePainReportVisible = useCallback(() => {
     setPainReportVisible((prevState) => !prevState);
@@ -121,6 +192,8 @@ const AnalysisPage = () => {
           data: painData.map((entry) =>
             typeof entry.painLevel === "number" ? entry.painLevel : 0
           ),
+          getDotColor: (value, index) =>
+            painData[index].selectedPeriodDay === "yes" ? "red" : "green", // Mark dots red if selectedPeriodDay is "yes"
         },
       ],
     };
@@ -146,6 +219,9 @@ const AnalysisPage = () => {
               bezier
               style={{ borderRadius: 16 }}
               verticalLabelRotation={30}
+              getDotColor={(value, index) =>
+                painData[index].selectedPeriodDay === "yes" ? "red" : "green"
+              }
             />
           </ScrollView>
         );
@@ -227,6 +303,7 @@ const AnalysisPage = () => {
               color="#000"
             />
           </Pressable>
+
           {PainReportVisible && (
             <ScrollView
               style={styles.scrollView}
@@ -235,6 +312,95 @@ const AnalysisPage = () => {
               <View style={styles.textView}>
                 <Text style={styles.textHeading}>Pain Status</Text>
                 {renderPieChart}
+              </View>
+
+              <View style={styles.textView}>
+                <Text style={styles.textHeading}>Pain During Menstruation</Text>
+                <View
+                  style={{
+                    justifyContent: "space-around",
+                    paddingHorizontal: 70,
+                  }}
+                >
+                  <View style={styles.menstrualTextHeader}>
+                    <Text style={styles.textReportHeader}>Pain Label</Text>
+                    <Text style={styles.textReportHeader}>Days</Text>
+                  </View>
+                  <View style={styles.menstrualTextContainer}>
+                    <Text style={styles.textReport}>Very High:</Text>
+                    <Text style={styles.menstrualdayText}>
+                      {painDays.veryHigh}
+                    </Text>
+                  </View>
+                  <View style={styles.menstrualTextContainer}>
+                    <Text style={styles.textReport}>High:</Text>
+                    <Text style={styles.menstrualdayText}>{painDays.high}</Text>
+                  </View>
+                  <View style={styles.menstrualTextContainer}>
+                    <Text style={styles.textReport}>Medium:</Text>
+                    <Text style={styles.menstrualdayText}>
+                      {painDays.medium}
+                    </Text>
+                  </View>
+                  <View style={styles.menstrualTextContainer}>
+                    <Text style={styles.textReport}>Low:</Text>
+                    <Text style={styles.menstrualdayText}>{painDays.low}</Text>
+                  </View>
+                  <View style={styles.menstrualTextContainer}>
+                    <Text style={styles.textReport}>Very Low:</Text>
+                    <Text style={styles.menstrualdayText}>
+                      {painDays.veryLow}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Left Breast Table */}
+              <View style={styles.textView}>
+                <Text style={styles.textHeading}>Left Breast</Text>
+                <View style={styles.tableHeader}>
+                  <Text style={styles.textReportHeader}>Position</Text>
+                  <Text style={styles.textReportHeader}>Pain Label</Text>
+                  <Text style={styles.textReportHeader}>Days</Text>
+                </View>
+                <View
+                  style={{
+                    justifyContent: "space-around",
+                    paddingHorizontal: 70,
+                  }}
+                >
+                  {leftBreastData.map((item, index) => (
+                    <View key={index} style={styles.breastTableRow}>
+                      <Text style={styles.textReport}>{item.position}</Text>
+                      <Text style={styles.textReport}>{item.painLabel}</Text>
+                      <Text style={styles.textReport}>{item.totalDays}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              {/* Right Breast Table */}
+              <View style={styles.textView}>
+                <Text style={styles.textHeading}>Right Breast</Text>
+                <View style={styles.tableHeader}>
+                  <Text style={styles.textReportHeader}>Position</Text>
+                  <Text style={styles.textReportHeader}>Pain Label</Text>
+                  <Text style={styles.textReportHeader}>Days</Text>
+                </View>
+                <View
+                  style={{
+                    justifyContent: "space-around",
+                    paddingHorizontal: 70,
+                  }}
+                >
+                  {rightBreastData.map((item, index) => (
+                    <View key={index} style={styles.breastTableRow}>
+                      <Text style={styles.textReport}>{item.position}</Text>
+                      <Text style={styles.textReport}>{item.painLabel}</Text>
+                      <Text style={styles.textReport}>{item.totalDays}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </ScrollView>
           )}
@@ -316,6 +482,45 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  menstrualTextHeader: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    paddingVertical: 3,
+    marginHorizontal: 25,
+  },
+  menstrualTextContainer: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    paddingVertical: 3,
+    marginHorizontal: 25,
+  },
+  textReportHeader: {
+    fontWeight: "500",
+    borderBottomWidth: 2,
+    paddingBottom: 3,
+    marginRight: 10,
+    marginBottom: 8,
+    borderColor: "#E280AF",
+  },
+  textReport: {
+    paddingTop: 5,
+    marginHorizontal: 2,
+    textAlign: "center",
+  },
+  menstrualdayText: {
+    paddingRight: 23,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+    paddingHorizontal: 70,
+  },
+  breastTableRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
   },
 });
 

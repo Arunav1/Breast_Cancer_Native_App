@@ -57,7 +57,7 @@ const Register = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        "http://192.168.42.185:3000/api/auth/register", // Use your local IP here
+        "http://192.168.137.31:3000/api/auth/register", // Use your local IP here
         {
           fullName: formState.inputValues.fullName,
           email: formState.inputValues.email,

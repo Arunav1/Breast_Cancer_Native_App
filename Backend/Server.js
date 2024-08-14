@@ -7,6 +7,7 @@ const cors = require("cors");
 const questRoutes = require("./Routes/QuestionRoutes");
 const dailyEntryRoutes = require("./Routes/DailyEntryRoute");
 const associatedSymptoms = require("./Routes/AssociatedSympRoutes");
+const LongTermSymptomsRoutes = require("./Routes/LongTermSympRoute");
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/", questRoutes);
 app.use("/", dailyEntryRoutes);
 app.use("/", associatedSymptoms);
+app.use("/", LongTermSymptomsRoutes);
 
 const PORT = process.env.PORT || 3000;
 

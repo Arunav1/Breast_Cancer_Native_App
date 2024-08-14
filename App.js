@@ -18,6 +18,7 @@ import AnalysisPage from "./screens/Analysis";
 import Drawer_tab from "./screens/Drawer_Tab";
 import { TransitionPresets } from "@react-navigation/stack";
 import ProfilePage from "./screens/Profile";
+import LongTermSymptoms from "./screens/LongTermSymptoms";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -132,6 +133,15 @@ export default function App() {
                 component={ProfilePage}
                 options={{
                   headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="LongTermSymptoms"
+                component={LongTermSymptoms}
+                options={{
+                  headerTitleAlign: "center",
+                  headerShown: false,
+                  headerStyle: { backgroundColor: "#FFF0F6" },
                 }}
               />
             </Stack.Navigator>

@@ -14,21 +14,27 @@ const Drawer_tab = ({ navigation }) => {
   const menuItems = [
     {
       id: 1,
-      title: "Notifications",
-      image: require("../assets/notification_icon.png"),
-      onPress: "Notification",
+      title: "My Doctor",
+      image: require("../assets/mydoctor.jpeg"),
+      onPress: "MyDoctor",
     },
     {
       id: 2,
-      title: "Appointments",
+      title: "My Records",
       image: require("../assets/Appointments.jpeg"),
-      onPress: "DoctorAppointments",
+      onPress: "MyDoctor",
     },
     {
       id: 3,
-      title: "Family Cancer History",
+      title: "Health History",
       image: require("../assets/healthhistory.png"),
       onPress: "FamilyCancerHistoryQuestion",
+    },
+    {
+      id: 4,
+      title: "Major Changes",
+      image: require("../assets/healthhistory.png"),
+      onPress: "LongTermSymptoms",
     },
   ];
 
@@ -61,7 +67,7 @@ const Drawer_tab = ({ navigation }) => {
 
   return (
     <LinearGradient
-      colors={["#E582AD", "#7131DD", "#7131DD"]}
+      colors={["#FFF0F6", "#FFD6F6", "#FFD6F6", "#C96EB9"]}
       style={styles.container}
     >
       <View style={styles.profile_sec}>
@@ -69,8 +75,7 @@ const Drawer_tab = ({ navigation }) => {
           source={require("../assets/profile.jpeg")}
           style={styles.profile_img}
         />
-        {/* profile navogation from here */}
-        <Pressable onPress={() => navigation.navigate("Profile")}>
+        <Pressable onPress={() => navigation.navigate("profile_delails")}>
           <Text style={styles.profile_name}>Name</Text>
           <Text>+91 75574893473</Text>
 
