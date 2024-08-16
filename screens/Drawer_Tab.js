@@ -22,13 +22,13 @@ const Drawer_tab = ({ navigation }) => {
       id: 2,
       title: "My Records",
       image: require("../assets/Appointments.jpeg"),
-      onPress: "MyDoctor",
+      onPress: "FamilyCancerHistoryQuestion",
     },
     {
       id: 3,
       title: "Health History",
       image: require("../assets/healthhistory.png"),
-      onPress: "FamilyCancerHistoryQuestion",
+      onPress: "",
     },
     {
       id: 4,

@@ -19,6 +19,8 @@ import Drawer_tab from "./screens/Drawer_Tab";
 import { TransitionPresets } from "@react-navigation/stack";
 import ProfilePage from "./screens/Profile";
 import LongTermSymptoms from "./screens/LongTermSymptoms";
+import FamilyCancerHistoryQuestion from "./screens/FamilyMedicalHistoryQuestion";
+import PatientQRCode from "./screens/QRcode";
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -79,7 +81,7 @@ export default function App() {
                   headerShown: false,
                 }}
               /> */}
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="BottomTab"
                 component={Tabs}
                 options={{
@@ -142,6 +144,21 @@ export default function App() {
                   headerTitleAlign: "center",
                   headerShown: false,
                   headerStyle: { backgroundColor: "#FFF0F6" },
+                }}
+              />
+              <Stack.Screen
+                name="FamilyCancerHistoryQuestion"
+                component={FamilyCancerHistoryQuestion}
+                options={{
+                  headerStyle: { backgroundColor: "#E582AD" },
+                  headerShown: false,
+                }}
+              /> */}
+              <Stack.Screen
+                name="PatientQRCode"
+                component={PatientQRCode}
+                options={{
+                  headerShown: false,
                 }}
               />
             </Stack.Navigator>
